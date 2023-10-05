@@ -1,5 +1,6 @@
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
+import { GetPlantDocument } from './graphql';
 
 const link = createHttpLink({
     uri: `${process.env.NEXT_PUBLIC_BASE_URL}/content/v1/spaces/${process.env.NEXT_PUBLIC_SPACE_ID}`,
@@ -14,5 +15,20 @@ const authLink = setContext((_, { headers }) => {
 });
 export const apolloClient = new ApolloClient({
     link: authLink.concat(link),
-    cache: new InMemoryCache({}),
+    cache: new InMemoryCache({
+        typePolicies: {
+            Query: {
+                fields: {
+                    plant: {
+                        read: (_, { args, toReference }) => {
+                            return toReference({
+                                __typename: 'Plant',
+                                id: args?.id,
+                            });
+                        },
+                    },
+                },
+            },
+        },
+    }),
 });

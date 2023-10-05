@@ -1,10 +1,11 @@
+overwrite: true
 schema:
     - '${NEXT_PUBLIC_BASE_URL}/content/v1/spaces/${NEXT_PUBLIC_SPACE_ID}':
           headers:
               Authorization: 'Bearer ${NEXT_PUBLIC_ACCESS_TOKEN}'
 documents: 'src/graphql/queries.graphql'
 generates:
-    src/graphql/graphql.tsx:
+    src/graphql/graphql.ts:
         plugins:
             - 'typescript'
             - 'typescript-operations'
