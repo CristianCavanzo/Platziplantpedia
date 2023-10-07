@@ -5,7 +5,7 @@ import {
     apolloClient,
 } from '@graphql';
 import { GetStaticProps, InferGetStaticPropsType } from 'next';
-import Image from 'next/image';
+import NextImage, { ImageLoaderProps } from 'next/image';
 import Link from 'next/link';
 
 export const getStaticProps: GetStaticProps<{
@@ -20,10 +20,47 @@ export const getStaticProps: GetStaticProps<{
 
     return { props: { plants }, revalidate: 24 * 60 };
 };
+type aspectRatio = '1:1' | '4:3' | '16:9';
+interface ImageProps {
+    layout: 'responsive' | 'intrinsic' | 'fixed';
+    src: string;
+    width: number;
+    alt: string;
+    aspectRatio: aspectRatio;
+    fit?: 'pad' | 'fill' | 'crop' | 'scale';
+}
+const calcAspectRatio = (aspectRatio: aspectRatio, width: number): number => {
+    const [x, y] = aspectRatio.split(':');
+    return Math.round((width * parseInt(y)) / parseInt(x));
+};
+const Image = ({
+    src,
+    width,
+    alt,
+    aspectRatio,
+    fit = 'scale',
+    layout,
+}: ImageProps) => {
+    const height = calcAspectRatio(aspectRatio, width);
+    const loader = (props: ImageLoaderProps): string => {
+        const loaderHeight = calcAspectRatio(aspectRatio, props.width);
+        return `${src}?w=${props.width}&h=${loaderHeight}&fit=${fit}`;
+    };
+    return (
+        <NextImage
+            layout={layout}
+            src={src}
+            width={width}
+            height={height}
+            alt={alt}
+            loader={loader}
+        />
+    );
+};
 
 const Home = ({ plants }: InferGetStaticPropsType<typeof getStaticProps>) => {
     return (
-        <div>
+        <div style={{ maxWidth: '500px' }}>
             {plants.map((item) => (
                 <div key={item.slug}>
                     <Link href={`/plant/${item.slug}`}>
@@ -32,9 +69,10 @@ const Home = ({ plants }: InferGetStaticPropsType<typeof getStaticProps>) => {
                             <Image
                                 src={item.image.url as string}
                                 width={500}
-                                height={300}
                                 alt={item.plantName as string}
-                                style={{ objectFit: 'cover' }}
+                                aspectRatio="16:9"
+                                layout="responsive"
+                                fit="scale"
                             />
                         )}
                     </Link>
