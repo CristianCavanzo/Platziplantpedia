@@ -5,8 +5,12 @@ import {
     apolloClient,
 } from '@graphql';
 import { GetStaticProps, InferGetStaticPropsType } from 'next';
-import NextImage, { ImageLoaderProps } from 'next/image';
+import NextImage, {
+    ImageLoaderProps,
+    ImageProps as NextImageProps,
+} from 'next/image';
 import Link from 'next/link';
+import { useCallback } from 'react';
 
 export const getStaticProps: GetStaticProps<{
     plants: Plant[];
@@ -21,13 +25,13 @@ export const getStaticProps: GetStaticProps<{
     return { props: { plants }, revalidate: 24 * 60 };
 };
 type aspectRatio = '1:1' | '4:3' | '16:9';
-interface ImageProps {
+interface ImageProps extends Omit<NextImageProps, 'height'> {
     layout: 'responsive' | 'intrinsic' | 'fixed';
     src: string;
     width: number;
     alt: string;
     aspectRatio: aspectRatio;
-    fit?: 'pad' | 'fill' | 'crop' | 'scale';
+    fit?: 'pad' | 'fill' | 'crop' | 'scale' | 'thumb';
 }
 const calcAspectRatio = (aspectRatio: aspectRatio, width: number): number => {
     const [x, y] = aspectRatio.split(':');
@@ -40,12 +44,16 @@ const Image = ({
     aspectRatio,
     fit = 'scale',
     layout,
+    ...props
 }: ImageProps) => {
     const height = calcAspectRatio(aspectRatio, width);
-    const loader = (props: ImageLoaderProps): string => {
-        const loaderHeight = calcAspectRatio(aspectRatio, props.width);
-        return `${src}?w=${props.width}&h=${loaderHeight}&fit=${fit}`;
-    };
+    const loader = useCallback(
+        (props: ImageLoaderProps) => {
+            const loaderHeight = calcAspectRatio(aspectRatio, props.width);
+            return `${src}?w=${props.width}&h=${loaderHeight}&fit=${fit}`;
+        },
+        [aspectRatio, fit]
+    );
     return (
         <NextImage
             layout={layout}
@@ -54,6 +62,7 @@ const Image = ({
             height={height}
             alt={alt}
             loader={loader}
+            {...props}
         />
     );
 };

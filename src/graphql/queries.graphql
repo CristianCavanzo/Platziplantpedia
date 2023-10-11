@@ -130,6 +130,14 @@ query getAuthorList(
     }
 }
 
+query getAuthorById($handle: String) {
+    authorCollection(where: { handle: $handle }) {
+        items {
+            ...AuthorFields
+        }
+    }
+}
+
 query getPlantListByAuthor($authorId: String!, $limit: Int = 10) {
     plantCollection(
         limit: $limit
