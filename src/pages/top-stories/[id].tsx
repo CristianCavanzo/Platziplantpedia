@@ -4,13 +4,13 @@ import {
     GetAuthorListQuery,
     apolloClient,
 } from '@graphql';
+import Error from '@pages/_error';
 import { GetServerSideProps, InferGetServerSidePropsType } from 'next';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 export const getServerSideProps: GetServerSideProps<{
-    authors: Author[];
-    currentAuthor: Author;
+    authors?: Author[];
+    currentAuthor?: Author;
     status: string;
 }> = async ({ params }) => {
     const authorHandle = String(params?.id);
@@ -22,6 +22,10 @@ export const getServerSideProps: GetServerSideProps<{
         const currentAuthor = authors.find(
             (author) => author.handle === authorHandle
         ) as Author;
+        if (!currentAuthor) {
+            throw 'error';
+        }
+
         return {
             props: {
                 authors,
@@ -30,8 +34,11 @@ export const getServerSideProps: GetServerSideProps<{
             },
         };
     } catch (error) {
-        console.log(error);
-        return { notFound: true };
+        return {
+            props: {
+                status: 'false',
+            },
+        };
     }
 };
 const AuthorById = ({
@@ -40,10 +47,15 @@ const AuthorById = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     const router = useRouter();
     const currentAuthor = router.query.id;
-    const authorSelected = authors.find(
+
+    const authorSelected = authors?.find(
         (author) => author.handle === currentAuthor
     );
     const [currentTab, setCurrentTab] = useState(authorSelected);
+    if (status === 'false' || !Array.isArray(authors) || !authorSelected) {
+        return <Error statusCode={400} message="huh, something wrong" />;
+    }
+
     if (typeof currentTab === 'undefined') {
         return <p></p>;
     }
@@ -60,7 +72,6 @@ const AuthorById = ({
             </li>
         ),
     }));
-    console.log(currentTab);
     return (
         <div>
             <ul>{tabs.map((authors) => authors.content)}</ul>
