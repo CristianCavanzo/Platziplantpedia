@@ -14,10 +14,11 @@ import { useCallback } from 'react';
 
 export const getStaticProps: GetStaticProps<{
     plants: Plant[];
-}> = async () => {
+}> = async ({ defaultLocale, locales, locale }) => {
     const { data: response } = await apolloClient.query<GetPlantListQuery>({
         query: GetPlantListDocument,
         fetchPolicy: 'network-only',
+        variables: { locale },
     });
 
     const plants = response.plantCollection?.items as Plant[];
