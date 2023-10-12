@@ -5,11 +5,7 @@ import {
     Plant,
     apolloClient,
 } from '@graphql';
-import {
-    GetStaticProps,
-    InferGetServerSidePropsType,
-    InferGetStaticPropsType,
-} from 'next';
+import { GetStaticProps, InferGetStaticPropsType } from 'next';
 import { useRouter } from 'next/router';
 
 export const getStaticPaths = async () => {
@@ -26,20 +22,26 @@ export const getStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps<{ plant: Plant }> = async ({
     params,
+    preview,
 }) => {
     const slug = params?.slug;
-
-    const { data } = await apolloClient.query<GetPlantQuery>({
-        query: GetPlantDocument,
-        variables: {
-            slug,
-        },
-    });
-    const plant = data.plantCollection?.items[0] as Plant;
-    if (!plant) {
+    try {
+        const { data } = await apolloClient.query<GetPlantQuery>({
+            query: GetPlantDocument,
+            variables: {
+                slug,
+                preview: preview ?? false,
+            },
+        });
+        const plant = data.plantCollection?.items[0] as Plant;
+        if (!plant) {
+            return { notFound: true };
+        }
+        return { props: { plant }, revalidate: 24 * 60 };
+    } catch (error) {
+        console.log(error);
         return { notFound: true };
     }
-    return { props: { plant }, revalidate: 24 * 60 };
 };
 
 const PlantPage = ({
@@ -49,7 +51,12 @@ const PlantPage = ({
     if (router.isFallback) {
         return <div>Loading...</div>;
     }
-    return <div></div>;
+    return (
+        <div>
+            <p>{plant.slug}</p>
+            <p>{plant.plantName}</p>
+        </div>
+    );
 };
 
 export default PlantPage;
