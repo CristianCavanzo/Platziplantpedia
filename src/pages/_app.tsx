@@ -14,6 +14,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
                 <ul>
                     <li>
                         <Link href="/">Home</Link>
+                        <Link href="/search">Search</Link>
                     </li>
                 </ul>
                 <div className="lenguage">
