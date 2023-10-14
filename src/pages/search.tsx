@@ -13,7 +13,7 @@ const Search = () => {
     const [plants, setPlants] = useState<Plant[]>([]);
     const searchTerm = useDebounce(search, 500);
     useEffect(() => {
-        if (searchTerm && searchTerm.length > 5) {
+        if (searchTerm && searchTerm.length > 3) {
             apolloClient
                 .query<SearchPlantQuery>({
                     query: SearchPlantDocument,
@@ -38,6 +38,11 @@ const Search = () => {
     return (
         <div>
             <input type="text" onInput={handleSearch} />
+            <div>
+                {plants.map((plant) => (
+                    <div key={plant.slug}>{plant.plantName}</div>
+                ))}
+            </div>
         </div>
     );
 };
