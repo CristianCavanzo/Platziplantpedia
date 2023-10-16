@@ -27,7 +27,6 @@ export const getStaticProps: GetStaticProps<{
 };
 type aspectRatio = '1:1' | '4:3' | '16:9';
 interface ImageProps extends Omit<NextImageProps, 'height'> {
-    layout: 'responsive' | 'intrinsic' | 'fixed';
     src: string;
     width: number;
     alt: string;
@@ -44,7 +43,6 @@ const Image = ({
     alt,
     aspectRatio,
     fit = 'scale',
-    layout,
     ...props
 }: ImageProps) => {
     const height = calcAspectRatio(aspectRatio, width);
@@ -57,7 +55,6 @@ const Image = ({
     );
     return (
         <NextImage
-            layout={layout}
             src={src}
             width={width}
             height={height}
@@ -81,7 +78,6 @@ const Home = ({ plants }: InferGetStaticPropsType<typeof getStaticProps>) => {
                                 width={500}
                                 alt={item.plantName as string}
                                 aspectRatio="16:9"
-                                layout="responsive"
                                 fit="scale"
                             />
                         )}
