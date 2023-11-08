@@ -1,47 +1,38 @@
-import { ApolloClient } from '@apollo/client';
-import {
-    Plant,
-    SearchPlantDocument,
-    SearchPlantQuery,
-    apolloClient,
-} from '@graphql';
+import { SearchPlantDocument, SearchPlantQuery, apolloClient } from '@graphql';
 import { useDebounce } from '@hooks/useDebounce';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useInfiniteQuery } from 'react-query';
+
+const useInfinitePlantSearch = (search: string) => {
+    return useInfiniteQuery(
+        ['search', search],
+        () =>
+            apolloClient.query<SearchPlantQuery>({
+                query: SearchPlantDocument,
+                variables: {
+                    term: search,
+                },
+            }),
+        { enabled: search.length > 3, staleTime: Infinity }
+    );
+};
 
 const Search = () => {
     const [search, setSearch] = useState('');
-    const [plants, setPlants] = useState<Plant[]>([]);
     const searchTerm = useDebounce(search, 500);
-    useEffect(() => {
-        if (searchTerm && searchTerm.length > 3) {
-            apolloClient
-                .query<SearchPlantQuery>({
-                    query: SearchPlantDocument,
-                    variables: {
-                        term: search,
-                    },
-                })
-                .then((response) => {
-                    console.log(response);
-                    const plants = response.data.plantCollection
-                        ?.items as Plant[];
-                    setPlants(plants);
-                })
-                .catch((e) => {
-                    console.log(e);
-                });
-        }
-    }, [searchTerm]);
+    const { data: plants } = useInfinitePlantSearch(searchTerm || '');
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearch(e.target.value);
     };
+    console.log(plants);
     return (
         <div>
             <input type="text" onInput={handleSearch} />
             <div>
-                {plants.map((plant) => (
-                    <div key={plant.slug}>{plant.plantName}</div>
-                ))}
+                {plants &&
+                    plants.pages[0].data.plantCollection?.items.map((plant) => (
+                        <p key={plant?.slug}>{plant?.plantName}</p>
+                    ))}
             </div>
         </div>
     );

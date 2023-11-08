@@ -8,22 +8,24 @@ export const Nav = () => {
         Cookie.set('NEXT_LOCALE', locale);
     };
     return (
-        <nav className={`${montserrat.className} `}>
+        <nav
+            className={`${montserrat.className} pb-1 border-b-2 border-black mb-4`}
+        >
             <ul className="flex items-center justify-between">
                 <li className="text-2xl font-bold">
                     <Link href="/">🌿 Plantpedia</Link>
                 </li>
-                <li>
+                {/* <li>
                     <div className="w-6 flex flex-col gap-y-1">
                         <div className="h-1 w-full bg-black"></div>
                         <div className="h-1 w-full bg-black"></div>
                         <div className="h-1 w-full bg-black"></div>
                     </div>
-                </li>
-                <li className="hidden">
+                </li> */}
+                <li>
                     <Link href="/search">Search</Link>
                 </li>
-                <li className="hidden">
+                <li>
                     <Link href="/top-stories/">Top stories</Link>
                 </li>
             </ul>
