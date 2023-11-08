@@ -1,7 +1,24 @@
 import { montserrat } from '@components/layout';
 import Cookie from 'js-cookie';
-
+import { signIn, signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { Fragment } from 'react';
+
+const Login = () => {
+    const { status, data } = useSession();
+    if (status === 'loading') {
+        return null;
+    }
+    if (status === 'unauthenticated') {
+        return <button onClick={() => signIn()}>Sign in</button>;
+    }
+    return (
+        <Fragment>
+            <p>Hello, {data?.user?.name}</p>
+            <button onClick={() => signOut()}>Sign out</button>
+        </Fragment>
+    );
+};
 
 export const Nav = () => {
     const changeLanguage = (locale: string) => {
@@ -29,6 +46,7 @@ export const Nav = () => {
                     <Link href="/top-stories/">Top stories</Link>
                 </li>
             </ul>
+            <Login />
             <div className="lenguage">
                 <Link href="/" locale="en-US">
                     <p onClick={() => changeLanguage('en-US')}>English</p>
