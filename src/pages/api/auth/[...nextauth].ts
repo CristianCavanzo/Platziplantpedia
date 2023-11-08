@@ -1,11 +1,7 @@
 import axios from 'axios';
-import NextAuth, {
-    Awaitable,
-    NextAuthOptions,
-    RequestInternal,
-    User,
-} from 'next-auth';
+import NextAuth, { NextAuthOptions, User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GitHubProvider from 'next-auth/providers/github';
 
 const options: NextAuthOptions = {
     theme: {
@@ -40,6 +36,10 @@ const options: NextAuthOptions = {
                     return null;
                 }
             },
+        }),
+        GitHubProvider({
+            clientId: process.env.NEXT_GITHUB_CLIENT_ID as string,
+            clientSecret: process.env.NEXT_GITHUB_CLIENT_SECRET as string,
         }),
     ],
 };
